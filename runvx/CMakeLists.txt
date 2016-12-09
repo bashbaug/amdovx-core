@@ -23,8 +23,8 @@ project (runvx)
 
 set (CMAKE_CXX_STANDARD 11)
 
-find_package(OpenCL QUIET)
-find_package(OpenCV QUIET)
+find_package(OpenCL)
+find_package(OpenCV)
 
 include_directories(../openvx/include)
 

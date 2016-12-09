@@ -25,6 +25,54 @@ THE SOFTWARE.
 
 #if ENABLE_OPENCL
 
+const std::string cMediaOpsDefinitions = OPENCL_FORMAT(
+    "#ifndef MEDIA_OPS\n"
+    "#define MEDIA_OPS\n"
+    "float amd_unpack3(uint src)\n"
+    "{\n"
+    "  return convert_float( as_uchar4(src).w );\n"
+    "}\n"
+    "float amd_unpack2(uint src)\n"
+    "{\n"
+    "  return convert_float( as_uchar4(src).z );\n"
+    "}\n"
+    "float amd_unpack1(uint src)\n"
+    "{\n"
+    "  return convert_float( as_uchar4(src).y );\n"
+    "}\n"
+    "float amd_unpack0(uint src)\n"
+    "{\n"
+    "  return convert_float( as_uchar4(src).x );\n"
+    "}\n"
+	"float4 amd_unpack(uint src)\n"
+	"{\n"
+    "  return convert_float4( as_uchar4(src) );\n"
+	"}\n"
+    "uint amd_pack(float4 src)\n"
+    "{\n"
+    "  return as_uint( convert_uchar4(src) );\n"
+    "}\n"
+    "uint amd_lerp(uint src0, uint src1, uint src2)\n"
+    "{\n"
+	"   return (((((src0 >>  0) & 0xff) + ((src1 >>  0) & 0xff) + ((src2 >>  0) & 1)) >> 1) <<  0) +\n"
+    "          (((((src0 >>  8) & 0xff) + ((src1 >>  8) & 0xff) + ((src2 >>  8) & 1)) >> 1) <<  8) +\n"
+    "          (((((src0 >> 16) & 0xff) + ((src1 >> 16) & 0xff) + ((src2 >> 16) & 1)) >> 1) << 16) +\n"
+    "          (((((src0 >> 24) & 0xff) + ((src1 >> 24) & 0xff) + ((src2 >> 24) & 1)) >> 1) << 24);\n"
+    "}\n"
+    "float amd_min3(float x, float y, float z)\n"
+    "{\n"
+    "   return min( min(x, y), z );\n"
+    "}\n"
+    "float amd_max3(float x, float y, float z)\n"
+    "{\n"
+    "   return max( max(x, y), z );\n"
+    "}\n"
+    "float amd_median3(float x, float y, float z)\n"
+    "{\n"
+    "    return max( min(x, y), min( max(x, y), z ) );\n"
+    "}\n"
+    "#endif\n");
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Generate OpenCL code for LinearFilter_U8_U8, LinearFilter_S16_U8, and LinearFilter_F32_U8
 //
@@ -104,7 +152,7 @@ int HafGpu_LinearFilter_ANY_U8(AgoNode * node, vx_df_image dst_image_format, Ago
 				"void %s(%sx8 * r, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride, COEF_%dx1 coef) {\n"
 				), filterWidth, filterWidth, node->opencl_name, dstRegType, filterWidth);
 		}
-		code = item;
+		code = cMediaOpsDefinitions + item;
 
 		// configuration
 		vx_uint32 LMemHeight = AGO_OPENCL_WORKGROUP_SIZE_1;
@@ -202,7 +250,7 @@ int HafGpu_LinearFilter_ANY_U8(AgoNode * node, vx_df_image dst_image_format, Ago
 				"void %s(%sx8 * r, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride, COEF_1x%d coef) {\n"
 				), filterHeight, filterHeight, node->opencl_name, dstRegType, filterHeight);
 		}
-		code = item;
+		code = cMediaOpsDefinitions + item;
 
 		// configuration
 		vx_uint32 LMemWidth = AGO_OPENCL_WORKGROUP_SIZE_0 * 8;
@@ -275,7 +323,7 @@ int HafGpu_LinearFilter_ANY_U8(AgoNode * node, vx_df_image dst_image_format, Ago
 				"void %s(%sx8 * r, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride, COEF_%dx%d coef) {\n"
 				), filterWidth*filterHeight, filterWidth, filterHeight, node->opencl_name, dstRegType, filterWidth, filterHeight);
 		}
-		code = item;
+		code = cMediaOpsDefinitions + item;
 
 		// configuration
 		vx_uint32 LMemHeight = AGO_OPENCL_WORKGROUP_SIZE_1;
@@ -628,7 +676,7 @@ int HafGpu_LinearFilter_ANY_S16(AgoNode * node, vx_df_image dst_image_format, Ag
 				"void %s(%sx8 * r, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride, COEF_1x%d coef) {\n"
 				), filterHeight, filterHeight, node->opencl_name, dstRegType, filterHeight);
 		}
-		std::string code = item;
+		std::string code = cMediaOpsDefinitions + item;
 
 		// configuration
 		vx_uint32 LMemWidth = AGO_OPENCL_WORKGROUP_SIZE_0 * 8 * 2;
@@ -809,7 +857,7 @@ int HafGpu_LinearFilter_ANY_F32(AgoNode * node, vx_df_image dst_image_format, Ag
 				"void %s(%sx8 * r, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride, COEF_%dx1 coef) {\n"
 				), filterWidth, filterWidth, node->opencl_name, dstRegType, filterWidth);
 		}
-		std::string code = item;
+		std::string code = cMediaOpsDefinitions + item;
 
 		node->opencl_param_discard_mask = filterCoefAreConstants ? (1 << 2) : 0;
 		node->opencl_local_buffer_usage_mask = (1 << 1);
@@ -942,7 +990,7 @@ int HafGpu_LinearFilter_ANY_F32(AgoNode * node, vx_df_image dst_image_format, Ag
 				"void %s(%sx8 * r, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride, COEF_1x%d coef) {\n"
 				), filterHeight, filterHeight, node->opencl_name, dstRegType, filterHeight);
 		}
-		std::string code = item;
+		std::string code = cMediaOpsDefinitions + item;
 
 		// configuration
 		vx_uint32 LMemWidth = AGO_OPENCL_WORKGROUP_SIZE_0 * 8 * 4;
@@ -1144,7 +1192,7 @@ int HafGpu_LinearFilter_ANYx2_U8(AgoNode * node, vx_df_image dst_image_format, A
 				"void %s(%sx8 * r1, %sx8 * r2, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride, COEF_%dx1 coef1, COEF_%dx1 coef2) {\n"
 				), filterWidth, filterWidth, node->opencl_name, dstRegType, dstRegType, filterWidth, filterWidth);
 		}
-		code = item;
+		code = cMediaOpsDefinitions + item;
 
 		// configuration
 		vx_uint32 LMemHeight = AGO_OPENCL_WORKGROUP_SIZE_1;
@@ -1279,7 +1327,7 @@ int HafGpu_LinearFilter_ANYx2_U8(AgoNode * node, vx_df_image dst_image_format, A
 				"void %s(%sx8 * r1, %sx8 * r2, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride, COEF_%dx%d coef1, COEF_%dx%d coef2) {\n"
 				), filterWidth*filterHeight, filterWidth, filterHeight, node->opencl_name, dstRegType, dstRegType, filterWidth, filterHeight, filterWidth, filterHeight);
 		}
-		code = item;
+		code = cMediaOpsDefinitions + item;
 
 		// configuration
 		vx_uint32 LMemHeight = AGO_OPENCL_WORKGROUP_SIZE_1;

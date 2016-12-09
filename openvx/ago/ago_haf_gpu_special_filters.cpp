@@ -105,8 +105,11 @@ int HafGpu_NonLinearFilter_3x3_ANY_U8(AgoNode * node)
 	}
 	// function declaration
 	char item[8192];
-	sprintf(item, "void %s(%sx8 * r, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride) {\n", node->opencl_name, dstRegType);
-	std::string code = item;
+	sprintf(item, 
+        OPENCL_FORMAT(
+        "void %s(%sx8 * r, uint x, uint y, __local uchar * lbuf, __global uchar * p, uint stride) {\n")
+        , node->opencl_name, dstRegType);
+	std::string code = cMediaOpsDefinitions + item;
 
 	// configuration
 	vx_uint32 LMemHeight = AGO_OPENCL_WORKGROUP_SIZE_1;
@@ -931,8 +934,20 @@ int HafGpu_CannySuppThreshold(AgoNode * node)
 	}
 	sprintf(item,
 		OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+        "int amd_bfe( int src, uint o, uint w )\n"
+        "{\n"
+        "  uint offset = o & 31;\n"
+        "  uint width = w & 31;\n"
+        "  uint ls = offset + width;\n"
+        "  int reslr = src << ( 32 - ls ) >> ( 32 - width );\n"
+        "  int resr  = src >> offset;\n"
+        "  int res = ( ls < 32 ) ? reslr : resr;\n"
+        "  res = ( width == 0 ) ? 0 : res;\n"
+        "  return res;\n"
+        "}\n"
+        "\n"
 		"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 		"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset, %suint p2_width, uint p2_height, __global uchar * p2_buf, uint p2_stride, uint p2_offset, uint2 p3)\n" // xyarg
 		"{\n"
@@ -1069,8 +1084,8 @@ int HafGpu_HarrisSobelFilters(AgoNode * node)
 	char item[8192];
 	node->opencl_code =
 		OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
 		"typedef float8 F32x8;\n"
 		);
 
@@ -1162,8 +1177,8 @@ int HafGpu_HarrisScoreFilters(AgoNode * node)
 	char item[8192];
 	sprintf(item,
 		OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
 		"typedef float8 F32x8;\n"
 		"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 		"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset, uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset, float p2, float p3)\n"
@@ -1316,8 +1331,8 @@ int HafGpu_NonMaxSupp_XY_ANY_3x3(AgoNode * node)
 	char item[8192];
 	sprintf(item,
 		OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
 		"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 		"void %s(__global char * p0_buf, uint p0_offset, uint p0_count, uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset)\n"
 		"{\n"
@@ -1330,7 +1345,7 @@ int HafGpu_NonMaxSupp_XY_ANY_3x3(AgoNode * node)
 		"  __local uchar lbuf[%d];\n" // LMemSize
 		)
 		, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, LMemSize);
-	node->opencl_code = item;
+	node->opencl_code = cMediaOpsDefinitions + item;
 	// load into local
 	if (HafGpu_Load_Local(work_group_width, work_group_height, LMemStride, work_group_height + 2, LMemSideLR, LMemSideTB, node->opencl_code) < 0) {
 		return -1;
@@ -1423,11 +1438,11 @@ int HafGpu_ScaleGaussianHalf(AgoNode * node)
 	int LMemSize = LMemStride * (work_group_height * 2 - 1 + LMemSideTB * 2);
 
 	// kernel declaration
-	char item[8192];
+	char item[16384];
 	sprintf(item,
 		OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
 		"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 		"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset, uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset)\n"
 		"{\n"
@@ -1443,7 +1458,7 @@ int HafGpu_ScaleGaussianHalf(AgoNode * node)
 		"  gx = lx; gy = ly;\n"
 		)
 		, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, LMemSize, (width + 3) / 4, height);
-	node->opencl_code = item;
+	node->opencl_code = cMediaOpsDefinitions + item;
 	// load input image into local
 	if (HafGpu_Load_Local(work_group_width, work_group_height, LMemStride, work_group_height * 2 - 1 + LMemSideTB * 2, LMemSideLR, LMemSideTB, node->opencl_code) < 0) {
 		return -1;
@@ -1595,8 +1610,8 @@ int HafGpu_ScaleGaussianOrb(AgoNode * node, vx_interpolation_type_e interpolatio
 	char item[8192];
 	sprintf(item,
 		OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
 		"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 		"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset, uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset)\n"
 		"{\n"
@@ -1619,7 +1634,7 @@ int HafGpu_ScaleGaussianOrb(AgoNode * node, vx_interpolation_type_e interpolatio
 		"  gx = lx; gy = ly;\n"
 		)
 		, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, LMemSize, (width + 3) / 4, height, xscale * 4.0f, xoffset, yscale, yoffset);
-	node->opencl_code = item;
+	node->opencl_code = cMediaOpsDefinitions + item;
 	// load input image into local
 	if (HafGpu_Load_Local(work_group_width, work_group_height, LMemStride, LMemHeight, 4, 0, node->opencl_code) < 0) {
 		return -1;

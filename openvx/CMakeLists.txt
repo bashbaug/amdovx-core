@@ -23,7 +23,7 @@ project (openvx)
 
 set (CMAKE_CXX_STANDARD 11)
 
-find_package(OpenCL QUIET)
+find_package(OpenCL)
 
 include_directories(include ago api)
 

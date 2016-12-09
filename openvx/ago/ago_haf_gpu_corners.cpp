@@ -75,7 +75,7 @@ int HafGpu_FastCorners_XY_U8(AgoNode * node)
 		// Pragma, data structure declarations and helper functions
 		sprintf(item,
 			OPENCL_FORMAT(
-				"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+				//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
 				"#define MASK_EARLY_EXIT 4369\n\n"								//((1<<0) | (1<<4) | (1<<8) | (1<<12))
 				"typedef struct {\n"
 				"\t int x;\n"
@@ -257,7 +257,7 @@ int HafGpu_FastCorners_XY_U8(AgoNode * node)
 		// Pragma and data structure declarations
 		sprintf(item,
 			OPENCL_FORMAT(
-				"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+				//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
 				"#define MASK_EARLY_EXIT 4369\n\n"								//((1<<0) | (1<<4) | (1<<8) | (1<<12))
 				"typedef struct {\n"
 				"\t int x;\n"

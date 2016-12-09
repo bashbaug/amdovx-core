@@ -70,11 +70,11 @@ int HafGpu_ChannelCombine_U32_422(AgoNode * node)
 	}
 
 	// kernel body
-	char item[8192];
+	char item[16384];
 	sprintf(item,
 		OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
 		"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 		"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset,\n"
 		"        uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset,\n"
@@ -101,7 +101,7 @@ int HafGpu_ChannelCombine_U32_422(AgoNode * node)
 		"  }\n"
 		"}\n")
 		, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, (width + 7) / 8, height, stride0, stride1, stride2, stride3, combineCode);
-	node->opencl_code = item;
+	node->opencl_code = cMediaOpsDefinitions + item;
 
 	// use completely separate kernel
 	node->opencl_type = NODE_OPENCL_TYPE_FULL_KERNEL;
@@ -171,8 +171,8 @@ int HafGpu_ChannelExtract_U8_U32(AgoNode * node)
 	char item[8192];
 	sprintf(item,
 		OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
 		"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 		"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset,\n"
 		"        uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset)\n"
@@ -192,7 +192,7 @@ int HafGpu_ChannelExtract_U8_U32(AgoNode * node)
 		"}\n")
 		, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, (width + 3) / 4, height, stride0, stride1, extractionCode
 		);
-	node->opencl_code = item;
+	node->opencl_code = cMediaOpsDefinitions + item;
 
 	// use completely separate kernel
 	node->opencl_type = NODE_OPENCL_TYPE_FULL_KERNEL;
@@ -300,7 +300,7 @@ int HafGpu_FormatConvert_420_422(AgoNode * node)
 	if ((kernel == VX_KERNEL_AMD_FORMAT_CONVERT_IYUV_YUYV) || (kernel == VX_KERNEL_AMD_FORMAT_CONVERT_IYUV_UYVY)) {
 		sprintf(item,
 			OPENCL_FORMAT(
-			"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+			//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
 			"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 			"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset,\n"
 			"        uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset,\n"
@@ -329,12 +329,12 @@ int HafGpu_FormatConvert_420_422(AgoNode * node)
 			"  }\n"
 			"}\n")
 			, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, (width + 7) / 8, (height + 1) / 2, stride0 * 2, stride1, stride2, stride3 * 2, stride3, conversionCode, stride0);
-		node->opencl_code = item;
+		node->opencl_code = cMediaOpsDefinitions + item;
 	}
 	else if ((kernel == VX_KERNEL_AMD_FORMAT_CONVERT_NV12_YUYV) || (kernel == VX_KERNEL_AMD_FORMAT_CONVERT_NV12_UYVY)) {
 		sprintf(item,
 			OPENCL_FORMAT(
-			"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+			//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
 			"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 			"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset,\n"
 			"        uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset,\n"
@@ -359,7 +359,7 @@ int HafGpu_FormatConvert_420_422(AgoNode * node)
 			"  }\n"
 			"}\n")
 			, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, (width + 7) / 8, (height + 1) / 2, stride0 * 2, stride1, stride2 * 2, stride2, conversionCode, stride0);
-		node->opencl_code = item;
+		node->opencl_code = cMediaOpsDefinitions + item;
 	}
 
 	// use completely separate kernel
@@ -401,7 +401,7 @@ int HafGpu_FormatConvert_Chroma(AgoNode * node)
 	if (kernel == VX_KERNEL_AMD_FORMAT_CONVERT_UV_UV12) {
 		sprintf(item,
 			OPENCL_FORMAT(
-			"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+			//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
 			"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 			"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset,\n"
 			"        uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset,\n"
@@ -429,12 +429,12 @@ int HafGpu_FormatConvert_Chroma(AgoNode * node)
 			"  }\n"
 			"}\n")
 			, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, (width + 7) / 8, (height + 1) / 2, stride0 * 2, stride1 * 2, stride2, stride0, stride1);
-		node->opencl_code = item;
+		node->opencl_code = cMediaOpsDefinitions + item;
 	}
 	else if (kernel == VX_KERNEL_AMD_FORMAT_CONVERT_IUV_UV12) {
 		sprintf(item,
 			OPENCL_FORMAT(
-			"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+			//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
 			"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 			"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset,\n"
 			"        uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset,\n"
@@ -468,12 +468,12 @@ int HafGpu_FormatConvert_Chroma(AgoNode * node)
 			"  }\n"
 			"}\n")
 			, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, (width + 7) / 8, (height + 1) / 2, stride0 * 2, stride1 * 2, stride2 * 2, stride2, stride0, stride1);
-		node->opencl_code = item;
+		node->opencl_code = cMediaOpsDefinitions + item;
 	}
 	else if (kernel == VX_KERNEL_AMD_FORMAT_CONVERT_UV12_IUV) {
 		sprintf(item,
 			OPENCL_FORMAT(
-			"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+			//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
 			"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 			"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset,\n"
 			"        uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset,\n"
@@ -506,12 +506,12 @@ int HafGpu_FormatConvert_Chroma(AgoNode * node)
 			"  }\n"
 			"}\n")
 			, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, (width + 7)/ 8, (height + 1)/ 2, stride0 * 2, stride1 * 2, stride2 * 2, stride1, stride2, stride0);
-		node->opencl_code = item;
+		node->opencl_code = cMediaOpsDefinitions + item;
 	}
 	else if (kernel == VX_KERNEL_AMD_SCALE_UP_2x2_U8_U8) {
 		sprintf(item,
 			OPENCL_FORMAT(
-			"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+			//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
 			"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 			"void %s(uint p0_width, uint p0_height, __global uchar * p0_buf, uint p0_stride, uint p0_offset,\n"
 			"        uint p1_width, uint p1_height, __global uchar * p1_buf, uint p1_stride, uint p1_offset)\n"
@@ -532,7 +532,7 @@ int HafGpu_FormatConvert_Chroma(AgoNode * node)
 			"  }\n"
 			"}\n")
 			, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME, (width + 7) / 8, (height + 1) / 2, stride0 * 2, stride1, stride0);
-		node->opencl_code = item;
+		node->opencl_code = cMediaOpsDefinitions + item;
 	}
 	else {
 		agoAddLogEntry(&node->akernel->ref, VX_FAILURE, "ERROR: HafGpu_FormatConvert_Chroma doesn't support kernel %s\n", node->akernel->name);
@@ -647,18 +647,18 @@ int HafGpu_ColorConvert(AgoNode * node)
 		kernel == VX_KERNEL_AMD_COLOR_CONVERT_IU_RGBX;
 
 	// kernel header and reading
-	char item[8192];
+	char item[16384];
 	sprintf(item,
 		OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
 		"typedef uint2   U8x8;\n"
 		"typedef uint8  U24x8;\n"
 		"typedef uint8  U32x8;\n"
 		"__kernel __attribute__((reqd_work_group_size(%d, %d, 1)))\n"
 		"void %s(")
 		, work_group_width, work_group_height, NODE_OPENCL_KERNEL_NAME);
-	node->opencl_code = item;
+	node->opencl_code = cMediaOpsDefinitions + item;
 	int argCount = 0;
 	if (isDestinationRGB) {
 		node->opencl_code += "uint pRGB_width, uint pRGB_height, __global uchar * pRGB_buf, uint pRGB_stride, uint pRGB_offset,\n";

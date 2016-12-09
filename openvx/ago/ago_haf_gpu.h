@@ -31,6 +31,8 @@ THE SOFTWARE.
 // OpenCL string format
 #define OPENCL_FORMAT(fmt) fmt
 
+extern const std::string cMediaOpsDefinitions;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Generate OpenCL code to load into local memory:
 //   this code assumes following variables created by caller in "code"

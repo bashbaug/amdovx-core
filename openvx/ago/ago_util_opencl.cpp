@@ -157,10 +157,10 @@ int agoGpuOclCreateContext(AgoContext * context, cl_context opencl_context)
 				agoAddLogEntry(NULL, VX_FAILURE, "ERROR: clGetPlatformInfo([%d],...) => %d (failed)\n", i, status);
 				return -1;
 			}
-			if (!strcmp(vendor, "Advanced Micro Devices, Inc.")) {
+			//if (!strcmp(vendor, "Advanced Micro Devices, Inc.")) {
 				platform_id = platform_list[i];
 				break;
-			}
+			//}
 		}
 		delete [] platform_list;
 		if (!platform_id) {
@@ -409,7 +409,8 @@ int agoGpuOclAllocBuffer(AgoData * data)
 	else if (data->ref.type == VX_TYPE_LUT) {
 		if (!data->opencl_buffer) {
 			cl_int err = -1;
-			cl_image_format format = { CL_INTENSITY, CL_UNORM_INT8 };
+			//cl_image_format format = { CL_INTENSITY, CL_UNORM_INT8 };
+            cl_image_format format = { CL_LUMINANCE, CL_UNORM_INT8 };
 			cl_image_desc desc = { CL_MEM_OBJECT_IMAGE1D, 256, 0, 0, 1, 0, 0, 0, 0, NULL };
 			data->opencl_buffer = data->opencl_buffer_allocated = clCreateImage(context->opencl_context, CL_MEM_READ_WRITE, &format, &desc, NULL, &err);
 			if (err) {
@@ -1095,14 +1096,9 @@ int agoGpuOclSuperNodeFinalize(AgoGraph * graph, AgoSuperNode * supernode)
 	}
 	// generate code: node functions in OpenCL
 	char item[256];
-	std::string code = OPENCL_FORMAT(
-		"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
-		"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
-		"float4 amd_unpack(uint src)\n"
-		"{\n"
-		"  return (float4)(amd_unpack0(src), amd_unpack1(src), amd_unpack2(src), amd_unpack3(src));\n"
-		"}\n"
-		"\n"
+	std::string code = cMediaOpsDefinitions + OPENCL_FORMAT(
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops : enable\n"
+		//"#pragma OPENCL EXTENSION cl_amd_media_ops2 : enable\n"
 		"///////////////////////////////////////////////////////////////////////////////\n"
 		"// Data Types\n"
 		"typedef uchar   U1x8;\n"

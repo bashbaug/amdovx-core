@@ -3509,6 +3509,18 @@ VX_API_ENTRY vx_status VX_API_CALL vxSetThresholdAttribute(vx_threshold thresh, 
 					status = VX_SUCCESS;
 				}
 				break;
+			case VX_THRESHOLD_ATTRIBUTE_TRUE_VALUE:
+				if (size == sizeof(vx_int32)) {
+					data->u.thr.true_value = *(vx_int32 *)ptr;
+					status = VX_SUCCESS;
+				}
+				break;
+			case VX_THRESHOLD_ATTRIBUTE_FALSE_VALUE:
+				if (size == sizeof(vx_int32)) {
+					data->u.thr.false_value = *(vx_int32 *)ptr;
+					status = VX_SUCCESS;
+				}
+				break;
 			default:
 				status = VX_ERROR_NOT_SUPPORTED;
 				break;
